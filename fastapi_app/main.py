@@ -38,3 +38,33 @@ async def get_existing_posters():
         answer[row[0]] = row[1:]
 
     return answer
+
+
+@app.get("/posters/{composition_id}")
+async def get_information(composition_id: str):
+    answer = {}
+    sql_request = f'''SELECT
+                        Poster.CompositionId,
+                        Poster.Title,
+                        Genre.GenreName,
+                        Poster.Time,
+                        Theatres.TheatreName,
+                        Theatres.TheatreAdress,
+                        Poster.AvailableSeats,
+                        Poster.Price
+                    FROM
+                        Poster
+                    LEFT JOIN Genre ON Poster.GenreId = Genre.GenreId
+                    LEFT JOIN Theatres ON Poster.TheatreId = Theatres.TheatreId
+                    WHERE Poster.CompositionId == {composition_id}'''
+
+    con = sqlite3.connect(f"{absolute_path}all_data/poster_data.db")
+    cur = con.cursor()
+
+    correct_info = cur.execute(sql_request).fetchall()
+    con.close()
+
+    for row in correct_info:
+        answer[row[0]] = row[1:]
+
+    return answer
